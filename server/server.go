@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/thanhquy1105/vida/controller"
 	"github.com/thanhquy1105/vida/repository"
 )
 
@@ -73,12 +74,25 @@ func (s *Server) handleConnection(conn *net.TCPConn) {
 	defer conn.Close()
 	defer s.wg.Done()
 
+	c := controller.NewSession(conn, s.repo)
+
 	for {
 		select {
 		case <-s.done:
 			log.Println("disconnecting", conn.RemoteAddr())
 			return
 		default:
+		}
+		err := c.Dispatch()
+		if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
+			continue
+		}
+		if err != nil {
+			if err == controller.ErrClientQuit || err.Error() == "EOF" {
+				return
+			}
+			log.Println(conn.RemoteAddr(), err)
+			return
 		}
 	}
 }
