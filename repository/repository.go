@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	cmap "github.com/orcaman/concurrent-map"
+	cmap "github.com/orcaman/concurrent-map/v2"
 )
 
 // QueueRepository represents a repository of mesage queues
@@ -12,7 +12,7 @@ type QueueRepository struct {
 	sync.Mutex
 	// cmap.ConcurrentMap is a thread-safe concurrent map.
 	// It provides a high-performance solution to this by sharding the map with minimal time spent waiting for locks
-	storage  cmap.ConcurrentMap
+	storage  cmap.ConcurrentMap[string, interface{}]
 	DataPath string
 }
 
@@ -22,6 +22,6 @@ func NewRepository(dataDir string) (*QueueRepository, error) {
 	if err != nil {
 		return nil, err
 	}
-	repo := QueueRepository{storage: cmap.New(), DataPath: dataPath}
+	repo := QueueRepository{storage: cmap.New[interface{}](), DataPath: dataPath}
 	return &repo, nil
 }

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"time"
 
@@ -42,4 +43,27 @@ func NewSession(conn Conn, repo *repository.QueueRepository) *Controller {
 		repo:       repo,
 		dataBuffer: make([]byte, 1024),
 	}
+}
+
+// ReadFirstMessage reads initial message from connection buffer
+func (c *Controller) ReadFirstMessage() (string, error) {
+	return c.rw.Reader.ReadString('\n')
+}
+
+// UnknownCommand reports an error
+func (c *Controller) UnknownCommand() error {
+	c.SendError(ErrUnknownCommand)
+	return ErrUnknownCommand
+}
+
+// SendError sends an error message to the client
+func (c *Controller) SendError(err error) {
+
+	if e, ok := err.(*Error); ok {
+		fmt.Fprintf(c.rw.Writer, "%s\r\n", e.Error())
+	} else {
+		fmt.Fprintf(c.rw.Writer, "%s %s\r\n", commonError, err.Error())
+	}
+
+	c.rw.Writer.Flush()
 }
