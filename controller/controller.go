@@ -9,6 +9,11 @@ import (
 	"github.com/thanhquy1105/vida/repository"
 )
 
+const (
+	storedMessage = "STORED\r\n"
+	endMessage    = "END\r\n"
+)
+
 // Conn represents a connecting consumer interface
 type Conn interface {
 	io.Reader

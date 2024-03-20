@@ -20,6 +20,8 @@ func (c *Controller) Dispatch() error {
 	switch command[0] {
 	case "get", "gets":
 		err = c.Get(command)
+	case "set":
+		err = c.Set(command)
 	case "quit":
 		return ErrClientQuit
 	default:
